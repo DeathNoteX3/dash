@@ -1,0 +1,58 @@
+{
+  "name": "videodash-desktop",
+  "version": "1.0.0",
+  "description": "A dashboard to help organize video creation workflow.",
+  "main": "dist-electron/main.js",
+  "homepage": "./",
+  "type": "module",
+  "author": "Diego",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:vite\" \"npm:dev:electron\"",
+    "start": "npm run dev",
+    "dev:vite": "vite",
+    "dev:electron": "wait-on tcp:5173 && npm run build:electron && electron .",
+    "build": "npm run build:vite && npm run build:electron && electron-builder",
+    "build:vite": "vite build",
+    "build:electron": "tsc -p electron/tsconfig.json"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.25",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
+    "concurrently": "^8.2.2",
+    "electron": "^29.1.5",
+    "electron-builder": "^24.13.3",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.videodash.app",
+    "productName": "VideoDash",
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "release"
+    },
+    "win": {
+      "icon": "build/icon.con"
+    },
+    "mac": {
+      "icon": "build/icon.con"
+    },
+    "linux": {
+      "icon": "build/icon.con"
+    }
+  }
+}
