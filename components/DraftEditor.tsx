@@ -1,6 +1,7 @@
 
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Video, ThumbnailSource, Product, StoreLink, ChecklistItem, Stage } from '../types';
 import ChevronDownIcon from './icons/ChevronDownIcon';
 import CopyIcon from './icons/CopyIcon';
@@ -108,6 +109,10 @@ const DraftEditor: React.FC<DraftEditorProps> = ({ onCancel, onSaveDraft, onDele
       }
   }, [draftToEdit, defaultPostDate, defaultVideoNumber, stagesConfig]);
 
+  const updateDraft = useCallback(<K extends keyof Video>(key: K, value: Video[K]) => {
+      setDraft(prev => prev ? { ...prev, [key]: value } : prev);
+  }, []);
+
   useEffect(() => {
     if (!draft) return;
     
@@ -153,12 +158,25 @@ const DraftEditor: React.FC<DraftEditorProps> = ({ onCancel, onSaveDraft, onDele
     if (JSON.stringify(newChecklist) !== JSON.stringify(draft.checklist)) {
         updateDraft('checklist', newChecklist);
     }
-  }, [draft?.title, draft?.description, draft?.tags, draft?.thumbnail, draft?.products, draft?.script, draft?.chapters, draft.checklist]);
+  }, [draft?.title, draft?.description, draft?.tags, draft?.thumbnail, draft?.products, draft?.script, draft?.chapters, draft.checklist, updateDraft]);
 
+  const namedProductsCount = useMemo(() => {
+    if (!draft) return 0;
+    // We only count products that have a name.
+    return draft.products.filter(p => p.name.trim() !== '').length;
+  }, [draft?.products]);
 
-  const updateDraft = <K extends keyof Video>(key: K, value: Video[K]) => {
-      setDraft(prev => prev ? { ...prev, [key]: value } : prev);
-  };
+  useEffect(() => {
+    if (!draft || !draft.title) return;
+
+    // This effect updates the title with the number of products if a number is already present.
+    const match = draft.title.match(/\d+/);
+    if (match && parseInt(match[0], 10) !== namedProductsCount) {
+      // Replace the first number found with the new count.
+      const newTitle = draft.title.replace(/\d+/, namedProductsCount.toString());
+      updateDraft('title', newTitle);
+    }
+  }, [namedProductsCount, draft.title, updateDraft]);
   
   const handleChecklistItemToggle = (key: ChecklistItem['key']) => {
     const newChecklist = draft.checklist.map(item => 
